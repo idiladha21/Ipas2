@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMS Retro Arcade: Anatomi Organ Tubuh SD Kelas 6</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Press+Start+2P&family=Rubik:wght@500;700;900&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        arcadeBg: '#FFFDF0',
+                        arcadeYellow: '#FFD000',
+                        arcadeCyan: '#00D2FF',
+                        arcadePink: '#FF2E93',
+                        arcadePurple: '#2D1537',
+                        arcadeGreen: '#00E676',
+                        arcadeOrange: '#FF9100',
+                        arcadeCardBg: '#FFFFFF'
+                    },
+                    fontFamily: {
+                        arcade: ['"Press Start 2P"', 'cursive'],
+                        sans: ['"Fredoka"', 'sans-serif'],
+                        rubik: ['"Rubik"', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'retro': '4px 4px 0px #2D1537',
+                        'retro-lg': '7px 7px 0px #2D1537',
+                        'retro-sm': '2px 2px 0px #2D1537'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #FFFDF0;
+            color: #2D1537;
+            background-image: radial-gradient(#2D1537 0.85px, transparent 0.85px);
+            background-size: 18px 18px;
+        }
+        .btn-retro {
+            border: 3px solid #2D1537;
+            box-shadow: 4px 4px 0px #2D1537;
+            transition: all 0.12s ease;
+        }
+        .btn-retro:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px #2D1537;
+        }
+        .btn-retro:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #2D1537;
+        }
+        .card-retro {
+            border: 4px solid #2D1537;
+            box-shadow: 6px 6px 0px #2D1537;
+            background-color: #FFFFFF;
+        }
+        .dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+        .drop-target-active {
+            background-color: #E0F7FA !important;
+            border-style: dashed !important;
+            animation: pulse-border 1s infinite alternate;
+        }
+        @keyframes pulse-border {
+            0% { border-color: #FF2E93; transform: scale(1.01); }
+            100% { border-color: #00D2FF; transform: scale(1.0); }
+        }
+        .float-score {
+            animation: floatUp 1s ease-out forwards;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(0.9); }
+            50% { opacity: 1; transform: translateY(-20px) scale(1.1); }
+            100% { opacity: 0; transform: translateY(-40px) scale(1); }
+        }
+        /* Custom scrollbar for retro feel */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FFFDF0;
+            border: 2px solid #2D1537;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FFD000;
+            border: 2px solid #2D1537;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-arcadePink selection:text-white pb-10">
+
+    <!-- HEADER RETRO ARCADE -->
+    <header class="sticky top-0 z-40 bg-arcadeYellow border-b-4 border-arcadePurple p-3 shadow-retro">
+        <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <!-- Title & Marquee -->
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 bg-arcadePink border-3 border-arcadePurple rounded-xl flex items-center justify-center font-arcade text-white text-2xl shadow-retro-sm animate-bounce">
+                    🎮
+                </div>
+                <div>
+                    <h1 class="font-arcade text-xs sm:text-sm md:text-base text-arcadePurple tracking-tight">LMS RETRO: ANATOMI ORGAN TUBUH</h1>
+                    <p class="text-xs font-bold text-arcadePurple/90">Sains Interaktif SD Kelas 6 &bull; Mode Terang Arcade</p>
+                </div>
+            </div>
+
+            <!-- Arcade Metrics Bar -->
+            <div class="flex items-center flex-wrap gap-2 sm:gap-3 text-xs font-bold">
+                <!-- Student Profile Info -->
+                <div class="bg-white border-2 border-arcadePurple px-3 py-1 rounded-lg shadow-retro-sm flex items-center gap-1.5">
+                    <span>👤</span>
+                    <span id="header-student-name" class="text-arcadePurple font-bold">Siswa Baru</span>
+                </div>
+
+                <!-- Timer -->
+                <div class="bg-arcadeCyan border-2 border-arcadePurple px-2.5 py-1 rounded-lg shadow-retro-sm flex items-center gap-1 text-arcadePurple font-arcade text-[10px]">
+                    ⏳ <span id="timer-display">00:00</span>
+                </div>
+
+                <!-- Score Counter -->
+                <div class="bg-arcadePink border-2 border-arcadePurple px-3 py-1 rounded-lg shadow-retro-sm text-white font-arcade text-[11px] flex items-center gap-1">
+                    🪙 <span id="header-score">0</span> PTS
+                </div>
+
+                <!-- Sound Toggle -->
+                <button onclick="toggleAudio()" id="audio-btn" class="bg-white border-2 border-arcadePurple p-1.5 rounded-lg shadow-retro-sm hover:bg-gray-100 text-base" title="Toggle Suara 8-Bit">
+                    🔊
+                </button>
+
+                <!-- Admin / Teacher Access Button -->
+                <button onclick="openAdminModal()" class="btn-retro bg-arcadeGreen text-arcadePurple font-arcade text-[10px] px-3 py-1.5 rounded-lg flex items-center gap-1">
+                    🔑 GURU / ADMIN
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVIGATION TABS (STAGE SELECTOR) -->
+    <div class="max-w-6xl mx-auto w-full px-4 mt-6">
+        <div class="grid grid-cols-3 gap-2 sm:gap-4">
+            <button id="nav-btn-1" onclick="switchStage(1)" class="btn-retro bg-arcadeYellow py-2.5 sm:py-3.5 px-2 rounded-xl font-arcade text-[9px] sm:text-xs text-arcadePurple flex flex-col sm:flex-row items-center justify-center gap-2 text-center">
+                <span>🎮</span> STAGE 1: MENU
+            </button>
+            <button id="nav-btn-2" onclick="switchStage(2)" class="btn-retro bg-white py-2.5 sm:py-3.5 px-2 rounded-xl font-arcade text-[9px] sm:text-xs text-arcadePurple flex flex-col sm:flex-row items-center justify-center gap-2 text-center">
+                <span>📚</span> STAGE 2: MATERI
+            </button>
+            <button id="nav-btn-3" onclick="switchStage(3)" class="btn-retro bg-white py-2.5 sm:py-3.5 px-2 rounded-xl font-arcade text-[9px] sm:text-xs text-arcadePurple flex flex-col sm:flex-row items-center justify-center gap-2 text-center">
+                <span>📝</span> STAGE 3: EVALUASI
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-6xl mx-auto w-full px-4 mt-6 flex-grow">
+
+        <!-- STUDENT IDENTITIES CARD -->
+        <div id="profile-banner" class="card-retro p-4 sm:p-5 mb-6 bg-arcadeYellow/30 border-4 rounded-2xl relative">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <div class="text-3xl sm:text-4xl p-2 bg-white border-2 border-arcadePurple rounded-xl shadow-retro-sm">🎒</div>
+                    <div>
+                        <h2 class="font-arcade text-xs sm:text-sm text-arcadePurple">IDENTITAS SISWA ARCADE</h2>
+                        <p class="text-xs text-arcadePurple/90 font-medium">Masukkan nama dan kelas sebelum bertualang di laboratorium organ tubuh!</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <input type="text" id="input-name" placeholder="Nama Lengkap Siswa" class="border-2 border-arcadePurple rounded-xl px-3 py-1.5 text-xs font-bold w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-arcadePink">
+                    <input type="text" id="input-class" placeholder="Kelas (contoh: 6A)" class="border-2 border-arcadePurple rounded-xl px-3 py-1.5 text-xs font-bold w-28 focus:outline-none focus:ring-2 focus:ring-arcadePink" value="6A">
+                    <input type="number" id="input-roll" placeholder="No. Absen" class="border-2 border-arcadePurple rounded-xl px-3 py-1.5 text-xs font-bold w-24 focus:outline-none focus:ring-2 focus:ring-arcadePink" value="1">
+                    <button onclick="saveStudentProfile()" class="btn-retro bg-arcadeGreen text-arcadePurple px-4 py-1.5 rounded-xl font-arcade text-xs font-bold w-full sm:w-auto">
+                        SIMPAN
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= STAGE 1: MENU UTAMA & HUB DRAG-DROP ================= -->
+        <section id="stage-1" class="space-y-6">
+            <!-- Instruction Banner -->
+            <div class="card-retro bg-arcadeCyan/20 p-4 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <span class="text-3xl animate-pulse">🎯</span>
+                    <div>
+                        <h3 class="font-arcade text-xs sm:text-sm text-arcadePurple">PETUNJUK FITUR DRAG & DROP MATERI</h3>
+                        <p class="text-xs text-arcadePurple/90">Seret (drag) kartu modul organ di bawah ke area target atau klik tombol <span class="font-bold underline">"Buka Modul Materi"</span> untuk mempelajari tulisan & video YouTube-nya!</p>
+                    </div>
+                </div>
+                <div class="text-xs font-bold bg-white border-2 border-arcadePurple px-3 py-2 rounded-xl shadow-retro-sm whitespace-nowrap text-center">
+                    Total Materi Dibaca: <span id="materi-progress-text" class="text-arcadePink font-arcade text-sm">0%</span>
+                </div>
+            </div>
+
+            <!-- Drag Target Zone Preview in Menu -->
+            <div id="menu-dropzone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" class="card-retro bg-arcadeYellow/10 border-4 border-dashed border-arcadePurple p-5 rounded-2xl text-center transition-all">
+                <div class="text-3xl mb-1">📥</div>
+                <h4 class="font-arcade text-xs text-arcadePurple">SLOT DRAG & DROP MODUL MATERI</h4>
+                <p class="text-[11px] text-arcadePurple/80 font-medium">Lepaskan (drop) kartu organ tubuh apa saja di sini untuk langsung membukanya di Stage 2!</p>
+            </div>
+
+            <!-- Organ Cards Grid (Drag Sources) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <!-- Organ 1: Jantung -->
+                <div draggable="true" ondragstart="handleDragStart(event, 'jantung')" ondragend="handleDragEnd(event)" class="card-retro p-4 rounded-2xl cursor-grab active:cursor-grabbing hover:bg-yellow-50 transition-all group relative">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="bg-arcadePink text-white text-[10px] font-arcade px-2.5 py-1 rounded-lg border border-arcadePurple">MODUL #1</span>
+                        <span id="badge-jantung" class="text-xs bg-gray-100 border border-arcadePurple px-2.5 py-0.5 rounded-lg font-bold text-gray-600">🔒 Belum Dibaca</span>
+                    </div>
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-14 h-14 bg-red-100 border-2 border-arcadePurple rounded-xl flex items-center justify-center text-3xl shadow-retro-sm group-hover:scale-110 transition-transform">
+                            ❤️
+                        </div>
+                        <div>
+                            <h4 class="font-arcade text-xs sm:text-sm text-arcadePurple">JANTUNG</h4>
+                            <p class="text-xs font-bold text-gray-500">Pemompa Darah Utama</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-arcadePurple/90 mb-4 line-clamp-2">Memompa darah berisi oksigen & sari makanan ke seluruh tubuh melalui pembuluh darah.</p>
+                    <button onclick="goToMateri('jantung')" class="btn-retro bg-arcadeYellow text-arcadePurple text-xs font-bold py-2 px-3 rounded-xl w-full flex items-center justify-center gap-1.5">
+                        <span>📖</span> Buka Modul Materi
+                    </button>
+                </div>
+
+                <!-- Organ 2: Paru-Paru -->
+                <div draggable="true" ondragstart="handleDragStart(event, 'paru')" ondragend="handleDragEnd(event)" class="card-retro p-4 rounded-2xl cursor-grab active:cursor-grabbing hover:bg-yellow-50 transition-all group relative">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="bg-arcadeCyan text-arcadePurple text-[10px] font-arcade px-2.5 py-1 rounded-lg border border-arcadePurple">MODUL #2</span>
+                        <span id="badge-paru" class="text-xs bg-gray-100 border border-arcadePurple px-2.5 py-0.5 rounded-lg font-bold text-gray-600">🔒 Belum Dibaca</span>
+                    </div>
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-14 h-14 bg-cyan-100 border-2 border-arcadePurple rounded-xl flex items-center justify-center text-3xl shadow-retro-sm group-hover:scale-110 transition-transform">
+                            🫁
+                        </div>
+                        <div>
+                            <h4 class="font-arcade text-xs sm:text-sm text-arcadePurple">PARU-PARU</h4>
+                            <p class="text-xs font-bold text-gray-500">Organ Pernapasan</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-arcadePurple/90 mb-4 line-clamp-2">Tempat pertukaran gas Oksigen (O2) dan Karbondioksida (CO2) di alveolus.</p>
+                    <button onclick="goToMateri('paru')" class="btn-retro bg-arcadeCyan text-arcadePurple text-xs font-bold py-2 px-3 rounded-xl w-full flex items-center justify-center gap-1.5">
+                        <span>📖</span> Buka Modul Materi
+                    </button>
+                </div>
+
+                <!-- Organ 3: Lambung -->
+                <div draggable="true" ondragstart="handleDragStart(event, 'lambung')" ondragend="handleDragEnd(event)" class="card-retro p-4 rounded-2xl cursor-grab active:cursor-grabbing hover:bg-yellow-50 transition-all group relative">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="bg-arcadeYellow text-arcadePurple text-[10px] font-arcade px-2.5 py-1 rounded-lg border border-arcadePurple">MODUL #3</span>
+                        <span id="badge-lambung" class="text-xs bg-gray-100 border border-arcadePurple px-2.5 py-0.5 rounded-lg font-bold text-gray-600">🔒 Belum Dibaca</span>
+                    </div>
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-14 h-14 bg-yellow-100 border-2 border-arcadePurple rounded-xl flex items-center justify-center text-3xl shadow-retro-sm group-hover:scale-110 transition-transform">
+                            🫃
+                        </div>
+                        <div>
+                            <h4 class="font-arcade text-xs sm:text-sm text-arcadePurple">LAMBUNG</h4>
+                            <p class="text-xs font-bold text-gray-500">Pencernaan Kimiawi</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-arcadePurple/90 mb-4 line-clamp-2">Mencerna makanan secara mekanis & kimiawi menggunakan asam lambung (HCl) dan enzim.</p>
+                    <button onclick="goToMateri('lambung')" class="btn-retro bg-arcadeYellow text-arcadePurple text-xs font-bold py-2 px-3 rounded-xl w-full flex items-center justify-center gap-1.5">
+                        <span>📖</span> Buka Modul Materi
+                    </button>
+                </div>
+
+                <!-- Organ 4: Ginjal & Hati -->
+                <div draggable="true" ondragstart="handleDragStart(event, 'ginjal_hati')" ondragend="handleDragEnd(event)" class="card-retro p-4 rounded-2xl cursor-grab active:cursor-grabbing hover:bg-yellow-50 transition-all group relative">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="bg-arcadeOrange text-arcadePurple text-[10px] font-arcade px-2.5 py-1 rounded-lg border border-arcadePurple">MODUL #4</span>
+                        <span id="badge-ginjal_hati" class="text-xs bg-gray-100 border border-arcadePurple px-2.5 py-0.5 rounded-lg font-bold text-gray-600">🔒 Belum Dibaca</span>
+                    </div>
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-14 h-14 bg-orange-100 border-2 border-arcadePurple rounded-xl flex items-center justify-center text-3xl shadow-retro-sm group-hover:scale-110 transition-transform">
+                            🩸
+                        </div>
+                        <div>
+                            <h4 class="font-arcade text-xs sm:text-sm text-arcadePurple">GINJAL & HATI</h4>
+                            <p class="text-xs font-bold text-gray-500">Filtrasi & Detoks</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-arcadePurple/90 mb-4 line-clamp-2">Ginjal menyaring sisa metabolisme darah menjadi urine, sedangkan hati menetralkan racun.</p>
+                    <button onclick="goToMateri('ginjal_hati')" class="btn-retro bg-arcadeOrange text-arcadePurple text-xs font-bold py-2 px-3 rounded-xl w-full flex items-center justify-center gap-1.5">
+                        <span>📖</span> Buka Modul Materi
+                    </button>
+                </div>
+
+                <!-- Organ 5: Otak -->
+                <div draggable="true" ondragstart="handleDragStart(event, 'otak')" ondragend="handleDragEnd(event)" class="card-retro p-4 rounded-2xl cursor-grab active:cursor-grabbing hover:bg-yellow-50 transition-all group relative">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="bg-purple-300 text-arcadePurple text-[10px] font-arcade px-2.5 py-1 rounded-lg border border-arcadePurple">MODUL #5</span>
+                        <span id="badge-otak" class="text-xs bg-gray-100 border border-arcadePurple px-2.5 py-0.5 rounded-lg font-bold text-gray-600">🔒 Belum Dibaca</span>
+                    </div>
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-14 h-14 bg-purple-100 border-2 border-arcadePurple rounded-xl flex items-center justify-center text-3xl shadow-retro-sm group-hover:scale-110 transition-transform">
+                            🧠
+                        </div>
+                        <div>
+                            <h4 class="font-arcade text-xs sm:text-sm text-arcadePurple">OTAK MANUSIA</h4>
+                            <p class="text-xs font-bold text-gray-500">Pusat Kendali Saraf</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-arcadePurple/90 mb-4 line-clamp-2">Pusat pengendali seluruh gerakan, pikiran, ingatan, dan respon pancaindra manusia.</p>
+                    <button onclick="goToMateri('otak')" class="btn-retro bg-purple-300 text-arcadePurple text-xs font-bold py-2 px-3 rounded-xl w-full flex items-center justify-center gap-1.5">
+                        <span>📖</span> Buka Modul Materi
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= STAGE 2: HALAMAN MATERI ================= -->
+        <section id="stage-2" class="hidden space-y-6">
+            <!-- Target Dropzone inside Stage 2 -->
+            <div id="materi-dropzone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" class="card-retro bg-arcadeYellow/20 border-4 border-dashed border-arcadePurple p-5 rounded-2xl text-center transition-all">
+                <div class="text-3xl mb-1">🎯</div>
+                <h3 class="font-arcade text-xs sm:text-sm text-arcadePurple">SLOT MATERI AKTIF (DRAG TARGET)</h3>
+                <p class="text-xs text-arcadePurple/80 font-medium">Lepaskan kartu organ di sini untuk langsung beralih ke modul pembelajaran tersebut!</p>
+            </div>
+
+            <!-- Organ Material Selector Tabs -->
+            <div class="flex flex-wrap gap-2 border-b-2 border-arcadePurple pb-3">
+                <button onclick="switchOrganMateri('jantung')" id="tab-jantung" class="btn-retro bg-arcadePink text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1">❤️ Jantung</button>
+                <button onclick="switchOrganMateri('paru')" id="tab-paru" class="btn-retro bg-white text-arcadePurple px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1">🫁 Paru-Paru</button>
+                <button onclick="switchOrganMateri('lambung')" id="tab-lambung" class="btn-retro bg-white text-arcadePurple px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1">🫃 Lambung</button>
+                <button onclick="switchOrganMateri('ginjal_hati')" id="tab-ginjal_hati" class="btn-retro bg-white text-arcadePurple px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1">🩸 Ginjal & Hati</button>
+                <button onclick="switchOrganMateri('otak')" id="tab-otak" class="btn-retro bg-white text-arcadePurple px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1">🧠 Otak</button>
+            </div>
+
+            <!-- Material Card Container -->
+            <div class="card-retro p-5 sm:p-7 rounded-2xl bg-white space-y-6">
+                <!-- Header Title & Mark Read Button -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b-2 border-gray-200 pb-4 gap-3">
+                    <div>
+                        <span id="materi-category-badge" class="font-arcade text-[10px] bg-arcadeYellow text-arcadePurple px-2.5 py-1 rounded-lg border border-arcadePurple">MODUL SAINS SD KELAS 6</span>
+                        <h2 id="materi-title" class="font-arcade text-base sm:text-xl text-arcadePurple mt-1.5">JANTUNG MANUSIA</h2>
+                    </div>
+                    <button onclick="markAsRead()" id="read-toggle-btn" class="btn-retro bg-arcadeGreen text-arcadePurple text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 justify-center">
+                        <span>✅</span> Tandai Selesai Dibaca
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                    <!-- Left Column: Retro SVG Illustration & Written Text -->
+                    <div class="space-y-4">
+                        <!-- Dynamic SVG Box -->
+                        <div id="materi-svg-container" class="w-full h-48 bg-arcadeBg border-2 border-arcadePurple rounded-2xl flex items-center justify-center p-4 shadow-inner">
+                            <!-- SVG renders via JavaScript -->
+                        </div>
+
+                        <!-- Written Content Text -->
+                        <div class="prose max-w-none text-xs sm:text-sm text-arcadePurple space-y-3 leading-relaxed font-sans">
+                            <h3 class="font-arcade text-xs text-arcadePink flex items-center gap-1">
+                                <span>📌</span> FUNGSI & CARA KERJA ORGAN
+                            </h3>
+                            <div id="materi-body-text">
+                                <!-- Text content renders via JavaScript -->
+                            </div>
+                        </div>
+
+                        <!-- Fun Fact Box -->
+                        <div class="bg-yellow-100 border-2 border-arcadePurple p-3.5 rounded-2xl flex items-start gap-3 shadow-retro-sm">
+                            <span class="text-2xl">💡</span>
+                            <div>
+                                <h4 class="font-bold text-xs text-arcadePurple font-rubik">FAKTA UNIK ARCADE:</h4>
+                                <p id="materi-fun-fact" class="text-xs text-arcadePurple/90 font-medium">Ukuran jantung manusia dewasa kira-kira sebesar kepalan tangan pemiliknya sendiri!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Youtube Video & Mini Interactive Challenge -->
+                    <div class="space-y-4">
+                        <!-- Youtube Video Container -->
+                        <div class="border-3 border-arcadePurple rounded-2xl overflow-hidden shadow-retro bg-black aspect-video relative">
+                            <iframe id="youtube-player" class="w-full h-full" src="https://www.youtube.com/embed/S2C83-9K3p4" title="Video Pembelajaran Organ Tubuh" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+
+                        <!-- Mini Challenge Box -->
+                        <div class="card-retro bg-arcadeCyan/10 p-4 rounded-2xl space-y-3">
+                            <h4 class="font-arcade text-xs text-arcadePurple flex items-center gap-1.5">
+                                <span>⚡</span> TANTANGAN KILAT MATERI
+                            </h4>
+                            <p id="mini-quiz-question" class="text-xs font-bold text-arcadePurple">Klik bagian fungsi yang paling tepat!</p>
+                            <div id="mini-quiz-options" class="grid grid-cols-1 gap-2">
+                                <!-- Dynamic Options -->
+                            </div>
+                            <div id="mini-quiz-feedback" class="text-xs font-bold hidden p-2.5 rounded-xl text-center"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= STAGE 3: HALAMAN EVALUASI ================= -->
+        <section id="stage-3" class="hidden space-y-6">
+            <!-- Quiz Control Header Bar -->
+            <div class="card-retro p-4 rounded-2xl bg-arcadeYellow/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="text-3xl p-2 bg-white border-2 border-arcadePurple rounded-xl shadow-retro-sm">🎯</div>
+                    <div>
+                        <h2 class="font-arcade text-xs sm:text-sm text-arcadePurple">EVALUASI KUIS RETRO ARCADE</h2>
+                        <p class="text-xs text-arcadePurple/80 font-medium">Sistem memilih secara acak <span class="font-bold underline">5 Soal dari 25 Bank Soal</span> Organ Tubuh SD Kelas 6.</p>
+                    </div>
+                </div>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button onclick="resetQuizStage()" class="btn-retro bg-arcadeOrange text-arcadePurple text-xs font-bold px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 w-full sm:w-auto">
+                        🔄 RESET STAGE & SOAL BARU
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quiz Screen Container -->
+            <div id="quiz-container" class="card-retro p-5 sm:p-7 rounded-2xl bg-white space-y-6 relative overflow-hidden">
+                <!-- Quiz Rule & Badge Header -->
+                <div class="flex items-center justify-between border-b-2 border-gray-200 pb-3 text-xs font-bold">
+                    <span class="bg-arcadePink text-white font-arcade text-[10px] px-3 py-1 rounded-lg border border-arcadePurple">
+                        SOAL <span id="quiz-current-num">1</span> DARI 5
+                    </span>
+                    <div class="flex items-center gap-3 text-[11px] font-rubik">
+                        <span class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300">BENAR = +100 PTS</span>
+                        <span class="text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-300">SALAH = -20 PTS</span>
+                    </div>
+                </div>
+
+                <!-- Floating Score Container Placeholder -->
+                <div id="floating-score-container" class="absolute inset-0 pointer-events-none flex items-center justify-center z-30"></div>
+
+                <!-- Question Text -->
+                <div class="space-y-2">
+                    <h3 id="quiz-question-text" class="font-bold text-sm sm:text-base text-arcadePurple leading-relaxed min-h-[50px] font-rubik">
+                        Memuat pertanyaan kuis...
+                    </h3>
+                </div>
+
+                <!-- Options Grid -->
+                <div id="quiz-options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Dynamic Options -->
+                </div>
+
+                <!-- Quiz Progress Bar -->
+                <div class="w-full bg-gray-200 border-2 border-arcadePurple rounded-full h-3.5 overflow-hidden">
+                    <div id="quiz-progress-bar" class="bg-arcadeCyan h-full transition-all duration-300" style="width: 20%;"></div>
+                </div>
+            </div>
+
+            <!-- DYNAMIC FEEDBACK BANNER & RESULT SUMMARY -->
+            <div id="result-modal" class="hidden card-retro p-6 sm:p-8 rounded-2xl bg-white space-y-6 border-4 border-arcadePurple shadow-retro-lg">
+                <div class="text-center space-y-3">
+                    <!-- Rank Badge -->
+                    <div id="rank-badge" class="inline-block font-arcade text-sm sm:text-base bg-arcadeYellow text-arcadePurple border-3 border-arcadePurple px-5 py-2 rounded-2xl shadow-retro">
+                        🏆 PREDIKAT: MASTER ANATOMI RETRO
+                    </div>
+
+                    <h2 class="font-arcade text-base sm:text-xl text-arcadePurple">STAGE EVALUASI SELESAI!</h2>
+                    
+                    <!-- Dynamic Feedback Banner Combining Menu & Evaluation Data -->
+                    <div id="dynamic-feedback-banner" class="text-xs sm:text-sm text-arcadePurple max-w-2xl mx-auto leading-relaxed font-medium bg-amber-50 p-4 sm:p-5 rounded-2xl border-3 border-arcadePurple shadow-retro-sm text-left space-y-2">
+                        <!-- Dynamic text content -->
+                    </div>
+                </div>
+
+                <!-- Breakdown Metrics Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                    <div class="bg-arcadeBg border-2 border-arcadePurple p-3 rounded-xl shadow-retro-sm">
+                        <p class="text-[10px] font-arcade text-gray-500">TOTAL SKOR</p>
+                        <p id="res-total-score" class="font-arcade text-lg text-arcadePink mt-1">0</p>
+                    </div>
+                    <div class="bg-arcadeBg border-2 border-arcadePurple p-3 rounded-xl shadow-retro-sm">
+                        <p class="text-[10px] font-arcade text-gray-500">BENAR (+100)</p>
+                        <p id="res-correct" class="font-arcade text-lg text-emerald-600 mt-1">0</p>
+                    </div>
+                    <div class="bg-arcadeBg border-2 border-arcadePurple p-3 rounded-xl shadow-retro-sm">
+                        <p class="text-[10px] font-arcade text-gray-500">SALAH (-20)</p>
+                        <p id="res-wrong" class="font-arcade text-lg text-rose-600 mt-1">0</p>
+                    </div>
+                    <div class="bg-arcadeBg border-2 border-arcadePurple p-3 rounded-xl shadow-retro-sm">
+                        <p class="text-[10px] font-arcade text-gray-500">MATERI DIBACA</p>
+                        <p id="res-read-pct" class="font-arcade text-lg text-arcadeCyan mt-1">0%</p>
+                    </div>
+                </div>
+
+                <div class="pt-2 border-t-2 border-gray-100 text-center">
+                    <p class="text-xs text-gray-600 mb-4 font-medium">
+                        ℹ️ Hasil pengerjaanmu telah otomatis tersimpan ke sistem Rekap Guru/Admin. Untuk mengunduh file spreadsheet (`.csv`), minta Guru / Admin memasukkan password melalui tombol di header.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                        <button onclick="resetQuizStage()" class="btn-retro bg-arcadeYellow text-arcadePurple px-6 py-3 rounded-xl font-arcade text-xs font-bold flex items-center justify-center gap-2">
+                            <span>🔄</span> COBA EVALUASI LAGI
+                        </button>
+                        <button onclick="switchStage(1)" class="btn-retro bg-arcadeCyan text-arcadePurple px-6 py-3 rounded-xl font-arcade text-xs font-bold flex items-center justify-center gap-2">
+                            <span>🏠</span> KEMBALI KE MENU HUB
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL AKSES GURU / ADMIN & SPREADSHEET EXPORTER -->
+    <div id="admin-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="card-retro bg-white max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 rounded-2xl relative shadow-retro-lg border-4 border-arcadePurple">
+            <!-- Close Button -->
+            <button onclick="closeAdminModal()" class="absolute top-4 right-4 bg-arcadePink text-white border-2 border-arcadePurple rounded-lg w-8 h-8 font-bold flex items-center justify-center hover:bg-rose-600">
+                ✕
+            </button>
+
+            <!-- STEP 1: PASSWORD VERIFICATION -->
+            <div id="admin-login-step" class="space-y-4 text-center py-4">
+                <div class="text-5xl">🔒</div>
+                <h3 class="font-arcade text-sm sm:text-base text-arcadePurple">LOGIN AKSES GURU / ADMIN</h3>
+                <p class="text-xs text-arcadePurple/80 font-medium max-w-md mx-auto">
+                    Masukkan kata sandi khusus Guru/Admin untuk membuka Rekap Data Nilai dan mengunduh Laporan Spreadsheet (.CSV).
+                </p>
+
+                <div class="max-w-xs mx-auto space-y-3 pt-2">
+                    <input type="password" id="admin-password-input" placeholder="Masukkan Password..." class="border-3 border-arcadePurple rounded-xl px-4 py-2 text-sm text-center font-bold w-full focus:outline-none focus:ring-2 focus:ring-arcadePink">
+                    <button onclick="verifyAdminPassword()" class="btn-retro bg-arcadeGreen text-arcadePurple font-arcade text-xs font-bold py-2.5 px-6 rounded-xl w-full">
+                        MASUK PANEL ADMIN
+                    </button>
+                    <div id="admin-pwd-error" class="text-xs text-rose-600 font-bold hidden bg-rose-50 p-2 rounded-lg border border-rose-300">
+                        ❌ Password Salah! (Gunakan password "Idiladha")
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2: ADMIN DASHBOARD & REKAP SPREADSHEET -->
+            <div id="admin-dashboard-step" class="hidden space-y-6">
+                <div class="flex items-center justify-between border-b-2 border-arcadePurple pb-3">
+                    <div>
+                        <span class="bg-arcadeGreen text-arcadePurple text-[10px] font-arcade px-2.5 py-1 rounded border border-arcadePurple">AKSES TERVERIFIKASI</span>
+                        <h3 class="font-arcade text-sm sm:text-base text-arcadePurple mt-1">PANEL REKAP GURU / ADMIN</h3>
+                    </div>
+                    <button onclick="logoutAdmin()" class="btn-retro bg-arcadeOrange text-arcadePurple text-xs font-bold px-3 py-1.5 rounded-lg">
+                        🔒 KELUAR ADMIN
+                    </button>
+                </div>
+
+                <!-- Admin Action Toolbar -->
+                <div class="flex flex-wrap items-center justify-between gap-3 bg-arcadeYellow/20 p-4 rounded-xl border-2 border-arcadePurple">
+                    <div class="text-xs text-arcadePurple font-medium">
+                        Total Data Terdaftar: <span id="admin-count-badge" class="font-bold text-arcadePink font-arcade">0 Siswa</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="downloadSpreadsheetCSV()" class="btn-retro bg-arcadeGreen text-arcadePurple px-4 py-2 rounded-xl text-xs font-bold font-arcade flex items-center gap-1.5">
+                            <span>📊</span> DOWNLOAD SPREADSHEET (.CSV)
+                        </button>
+                        <button onclick="addMockDataSample()" class="btn-retro bg-arcadeCyan text-arcadePurple px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1">
+                            <span>➕</span> Tambah Contoh Data
+                        </button>
+                        <button onclick="clearAllStudentRecords()" class="btn-retro bg-arcadePink text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1">
+                            <span>🗑️</span> Hapus Semua Data
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Student Records Table -->
+                <div class="overflow-x-auto border-2 border-arcadePurple rounded-xl shadow-retro-sm">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-arcadeYellow border-b-2 border-arcadePurple font-arcade text-[10px] text-arcadePurple">
+                                <th class="p-2.5 border-r border-arcadePurple">TANGGAL</th>
+                                <th class="p-2.5 border-r border-arcadePurple">NAMA SISWA</th>
+                                <th class="p-2.5 border-r border-arcadePurple">KELAS/NO</th>
+                                <th class="p-2.5 border-r border-arcadePurple">MATERI DIBACA</th>
+                                <th class="p-2.5 border-r border-arcadePurple">BENAR (+100)</th>
+                                <th class="p-2.5 border-r border-arcadePurple">SALAH (-20)</th>
+                                <th class="p-2.5 border-r border-arcadePurple">TOTAL SKOR</th>
+                                <th class="p-2.5">PREDIKAT</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-records-tbody" class="divide-y border-arcadePurple font-medium">
+                            <!-- Dynamic rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="max-w-6xl mx-auto w-full px-4 mt-8 text-center text-xs font-bold text-arcadePurple/70">
+        <p>🎮 LMS Retro Arcade Organ Tubuh SD Kelas 6 &bull; Media Pembelajaran Interaktif 8-Bit</p>
+    </footer>
+
+    <!-- JAVASCRIPT ENGINE -->
+    <script>
+        // ================= GLOBAL STATE =================
+        let studentData = {
+            name: "Siswa Baru",
+            class: "6A",
+            roll: "1"
+        };
+
+        let currentStage = 1;
+        let currentScore = 0;
+        let audioEnabled = true;
+        let activeOrgan = 'jantung';
+        
+        // Timer Logic
+        let secondsSpent = 0;
+        let timerInterval = null;
+
+        // LMS Track Progress for Organ Materials
+        let organReadState = {
+            jantung: false,
+            paru: false,
+            lambung: false,
+            ginjal_hati: false,
+            otak: false
+        };
+
+        // Quiz Logic
+        let activeQuizQuestions = [];
+        let currentQuestionIdx = 0;
+        let quizCorrectCount = 0;
+        let quizWrongCount = 0;
+        let userQuizAnswers = []; // Records response log for current quiz run
+
+        // Admin Auth State
+        let isAdminLoggedIn = false;
+
+        // ================= 25 BANK SOAL ORGAN TUBUH SD KELAS 6 =================
+        const QUESTION_BANK = [
+            { id: 1, q: "Organ tubuh yang berfungsi memompa darah ke seluruh jaringan tubuh manusia adalah...", ops: ["Paru-Paru", "Jantung", "Lambung", "Ginjal"], a: 1 },
+            { id: 2, q: "Tempat terjadinya pertukaran gas Oksigen (O2) dan Karbondioksida (CO2) di dalam paru-paru adalah...", ops: ["Bronkus", "Trakea", "Alveolus", "Laring"], a: 2 },
+            { id: 3, q: "Enzim pepsin dan Asam Klorida (HCl) yang membunuh kuman makanan dihasilkan di organ...", ops: ["Usus Halus", "Lambung", "Mulut", "Hati"], a: 1 },
+            { id: 4, q: "Organ pencernaan yang bertugas menyaring darah dan membuang sisa metabolisme dalam bentuk urine adalah...", ops: ["Ginjal", "Hati", "Jantung", "Paru-Paru"], a: 0 },
+            { id: 5, q: "Pusat pengendali utama seluruh aktivitas tubuh, pikiran, ingatan, dan emosi manusia adalah...", ops: ["Jantung", "Otak", "Hati", "Lambung"], a: 1 },
+            { id: 6, q: "Pembuluh darah yang membawa darah bersih kaya oksigen keluar dari jantung dinamakan...", ops: ["Pembuluh Vena", "Pembuluh Kapiler", "Pembuluh Arteri (Nadi)", "Pembuluh Limfa"], a: 2 },
+            { id: 7, q: "Zat empedu yang berguna mengemulsikan dan mencerna lemak dihasilkan oleh organ...", ops: ["Hati", "Ginjal", "Lambung", "Pankreas"], a: 0 },
+            { id: 8, q: "Bagian otak yang berfungsi mengatur keseimbangan tubuh dan koordinasi gerakan adalah...", ops: ["Otak Besar (Cerebrum)", "Otak Kecil (Cerebellum)", "Batang Otak", "Sumsum Tulang"], a: 1 },
+            { id: 9, q: "Otot utama penyekat rongga dada dan rongga perut yang membantu pernapasan disebut...", ops: ["Diafragma", "Biceps", "Jantung", "Interkostal"], a: 0 },
+            { id: 10, q: "Penyakit peradangan atau iritasi pada dinding lambung akibat makan tidak teratur dikenal dengan...", ops: ["Maag (Gastritis)", "Asma", "Anemia", "Hipertensi"], a: 0 },
+            { id: 11, q: "Ruang jantung yang bertugas menerima darah kotor (kaya CO2) dari seluruh tubuh adalah...", ops: ["Serambi Kiri", "Bilik Kiri", "Serambi Kanan", "Bilik Kanan"], a: 2 },
+            { id: 12, q: "Organ tempat terjadinya penyerapan sari-sari makanan ke dalam aliran darah adalah...", ops: ["Usus Halus", "Usus Besar", "Lambung", "Kerongkongan"], a: 0 },
+            { id: 13, q: "Penyerapan kembali air sisa pencernaan dan pembentukan feses terjadi pada...", ops: ["Usus Besar", "Usus Halus", "Lambung", "Anus"], a: 0 },
+            { id: 14, q: "Unit penyaring mikroskopis di dalam ginjal yang menyaring limbah darah dinamakan...", ops: ["Nefron", "Alveolus", "Neuritis", "Aorta"], a: 0 },
+            { id: 15, q: "Saat kita menghembuskan napas (ekspirasi), maka posisi otot diafragma akan...", ops: ["Berkontraksi mendatar", "Relaksasi melengkung ke atas", "Membesar", "Bergetar"], a: 1 },
+            { id: 16, q: "Gangguan pernapasan berupa penyempitan saluran napas akibat alergi atau debu disebut...", ops: ["Asma", "TBC", "Pneumonia", "Influenza"], a: 0 },
+            { id: 17, q: "Jumlah ruang utama yang dimiliki oleh jantung manusia adalah...", ops: ["2 Ruang", "3 Ruang", "4 Ruang", "5 Ruang"], a: 2 },
+            { id: 18, q: "Organ yang berfungsi utama menetralkan racun (detoksifikasi) di dalam darah adalah...", ops: ["Hati", "Jantung", "Paru-Paru", "Usus"], a: 0 },
+            { id: 19, q: "Penghubung komunikasi sinyal antar sel saraf di dalam otak menggunakan bantuan...", ops: ["Neurotransmitter", "Hormon Insulin", "Getah Bening", "Asam Urat"], a: 0 },
+            { id: 20, q: "Pengendapan garam kalsium di dalam saluran ginjal dapat menyebabkan penyakit...", ops: ["Batu Ginjal", "Diabetes", "Stroke", "Hipotensi"], a: 0 },
+            { id: 21, q: "Saluran pernapasan yang menghubungkan tenggorokan menuju ke paru-paru adalah...", ops: ["Trakea", "Kerongkongan", "Pilorus", "Aorta"], a: 0 },
+            { id: 22, q: "Zat pewarna merah darah yang mengikat oksigen untuk diedarkan ke seluruh tubuh adalah...", ops: ["Hemoglobin", "Fibrinogen", "Leukosit", "Trombosit"], a: 0 },
+            { id: 23, q: "Proses meremas dan mengaduk makanan secara mekanis menggunakan dinding otot terjadi di...", ops: ["Lambung", "Mulut", "Hati", "Usus Buntu"], a: 0 },
+            { id: 24, q: "Tindakan yang paling tepat untuk menjaga kesehatan organ pernapasan paru-paru adalah...", ops: ["Olahraga teratur & tidak merokok", "Makan makanan tinggi lemak", "Menghirup asap pembakaran", "Tidur terlentang lama"], a: 0 },
+            { id: 25, q: "Denyut pendorongan darah jantung dapat dirasakan dengan jelas pada...", ops: ["Pergelangan tangan & leher", "Dahi", "Lutut kaki", "Punggung"], a: 0 }
+        ];
+
+        // ================= RETRO AUDIO SYNTHESIZER (8-BIT SOUNDS) =================
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSynthSound(freqs, type = 'square', duration = 0.08) {
+            if (!audioEnabled) return;
+            try {
+                initAudio();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                freqs.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + (idx * duration));
+                    
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime + (idx * duration));
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + ((idx + 1) * duration));
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.start(audioCtx.currentTime + (idx * duration));
+                    osc.stop(audioCtx.currentTime + ((idx + 1) * duration));
+                });
+            } catch(e) {
+                console.log("Audio play error", e);
+            }
+        }
+
+        function playClickSound() { playSynthSound([440, 880], 'triangle', 0.04); }
+        function playDragSound() { playSynthSound([300, 420, 520], 'sine', 0.05); }
+        function playDropSound() { playSynthSound([180, 120], 'square', 0.08); }
+        function playCorrectSound() { playSynthSound([523.25, 659.25, 783.99, 1046.50], 'square', 0.08); }
+        function playWrongSound() { playSynthSound([220, 140], 'sawtooth', 0.12); }
+        function playFanfareSound() { playSynthSound([523.25, 659.25, 783.99, 880, 1046.50], 'triangle', 0.15); }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            document.getElementById('audio-btn').innerText = audioEnabled ? '🔊' : '🔇';
+            if (audioEnabled) playClickSound();
+        }
+
+        // ================= TIMER LOGIC =================
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                secondsSpent++;
+                const mins = Math.floor(secondsSpent / 60).toString().padStart(2, '0');
+                const secs = (secondsSpent % 60).toString().padStart(2, '0');
+                document.getElementById('timer-display').innerText = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        // ================= STAGE SWITCHING =================
+        function switchStage(stageNum) {
+            playClickSound();
+            currentStage = stageNum;
+
+            // Hide stages
+            document.getElementById('stage-1').classList.add('hidden');
+            document.getElementById('stage-2').classList.add('hidden');
+            document.getElementById('stage-3').classList.add('hidden');
+
+            // Reset Nav Styles
+            [1, 2, 3].forEach(i => {
+                const btn = document.getElementById(`nav-btn-${i}`);
+                btn.className = "btn-retro bg-white py-2.5 sm:py-3.5 px-2 rounded-xl font-arcade text-[9px] sm:text-xs text-arcadePurple flex flex-col sm:flex-row items-center justify-center gap-2 text-center";
+            });
+
+            // Active Stage
+            document.getElementById(`stage-${stageNum}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-btn-${stageNum}`);
+            activeBtn.className = "btn-retro bg-arcadeYellow py-2.5 sm:py-3.5 px-2 rounded-xl font-arcade text-[9px] sm:text-xs text-arcadePurple flex flex-col sm:flex-row items-center justify-center gap-2 text-center";
+
+            if (stageNum === 3 && activeQuizQuestions.length === 0) {
+                initQuizStage();
+            }
+        }
+
+        function saveStudentProfile() {
+            playClickSound();
+            const nameInput = document.getElementById('input-name').value.trim();
+            const classInput = document.getElementById('input-class').value.trim();
+            const rollInput = document.getElementById('input-roll').value.trim();
+
+            if (nameInput) {
+                studentData.name = nameInput;
+                studentData.class = classInput || "6A";
+                studentData.roll = rollInput || "1";
+                document.getElementById('header-student-name').innerText = studentData.name;
+                document.getElementById('profile-banner').classList.add('bg-arcadeGreen/20');
+            }
+        }
+
+        // ================= DRAG AND DROP MECHANISM =================
+        function handleDragStart(e, organId) {
+            playDragSound();
+            e.dataTransfer.setData('text/plain', organId);
+            e.target.classList.add('dragging');
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            const dz1 = document.getElementById('menu-dropzone');
+            const dz2 = document.getElementById('materi-dropzone');
+            if(dz1) dz1.classList.add('drop-target-active');
+            if(dz2) dz2.classList.add('drop-target-active');
+        }
+
+        function handleDragLeave(e) {
+            const dz1 = document.getElementById('menu-dropzone');
+            const dz2 = document.getElementById('materi-dropzone');
+            if(dz1) dz1.classList.remove('drop-target-active');
+            if(dz2) dz2.classList.remove('drop-target-active');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            playDropSound();
+            const dz1 = document.getElementById('menu-dropzone');
+            const dz2 = document.getElementById('materi-dropzone');
+            if(dz1) dz1.classList.remove('drop-target-active');
+            if(dz2) dz2.classList.remove('drop-target-active');
+
+            const organId = e.dataTransfer.getData('text/plain');
+            if (organId) {
+                switchStage(2);
+                switchOrganMateri(organId);
+            }
+        }
+
+        function goToMateri(organId) {
+            playClickSound();
+            switchStage(2);
+            switchOrganMateri(organId);
+        }
+
+        // ================= MATERI DATA & DISPLAY =================
+        const MATERI_DATA = {
+            jantung: {
+                title: "JANTUNG MANUSIA",
+                youtube: "https://www.youtube.com/embed/S2C83-9K3p4",
+                funFact: "Jantung manusia berdetak sekitar 100.000 kali dalam sehari tanpa pernah berhenti!",
+                text: `<p><b>Jantung</b> adalah organ berotot tebal yang memompa darah ke seluruh bagian tubuh. Jantung terletak di dalam rongga dada sebelah kiri dan dilindungi oleh tulang dada serta tulang rusuk.</p>
+                       <p>Jantung terbagi menjadi <b>4 ruang utama</b>:</p>
+                       <ul class="list-disc pl-5 space-y-1">
+                           <li><b>Serambi Kanan:</b> Menerima darah kotor (banyak CO2) dari seluruh tubuh.</li>
+                           <li><b>Bilik Kanan:</b> Memompa darah kotor menuju paru-paru.</li>
+                           <li><b>Serambi Kiri:</b> Menerima darah bersih (banyak O2) dari paru-paru.</li>
+                           <li><b>Bilik Kiri:</b> Memompa darah bersih ke seluruh tubuh.</li>
+                       </ul>`,
+                svg: `<svg class="w-28 h-28 text-red-500 animate-pulse" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`,
+                miniQuiz: {
+                    q: "Apa fungsi utama Bilik Kiri pada Jantung manusia?",
+                    ops: [
+                        { text: "Memompa darah bersih ke seluruh tubuh", correct: true },
+                        { text: "Menyaring air urine", correct: false },
+                        { text: "Menghasilkan asam klorida", correct: false }
+                    ]
+                }
+            },
+            paru: {
+                title: "PARU-PARU MANUSIA",
+                youtube: "https://www.youtube.com/embed/5D_1_e41j44",
+                funFact: "Paru-paru sebelah kanan memiliki 3 gelambir, sedangkan paru-paru kiri memiliki 2 gelambir!",
+                text: `<p><b>Paru-paru</b> adalah organ utama sistem pernapasan manusia yang terletak di dalam rongga dada.</p>
+                       <p>Proses pernapasan menghirup gas Oksigen (O2) dari udara dan menghembuskan Karbondioksida (CO2).</p>
+                       <p>Pertukaran gas O2 dan CO2 ini terjadi di dalam gelembung udara halus yang disebut <b>Alveolus</b>.</p>`,
+                svg: `<svg class="w-28 h-28 text-cyan-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a1 1 0 00-1 1v7.586l-2.293-2.293a1 1 0 00-1.414 1.414l4 4a1 1 0 001.414 0l4-4a1 1 0 00-1.414-1.414L13 10.586V3a1 1 0 00-1-1z"/><path d="M4 15a3 3 0 003 3h10a3 3 0 003-3v-2a1 1 0 10-2 0v2a1 1 0 01-1 1H7a1 1 0 01-1-1v-2a1 1 0 10-2 0v2z"/></svg>`,
+                miniQuiz: {
+                    q: "Tempat pertukaran gas O2 dan CO2 di paru-paru adalah...",
+                    ops: [
+                        { text: "Alveolus", correct: true },
+                        { text: "Trakea", correct: false },
+                        { text: "Kerongkongan", correct: false }
+                    ]
+                }
+            },
+            lambung: {
+                title: "LAMBUNG MANUSIA",
+                youtube: "https://www.youtube.com/embed/8A-7Lz13nO8",
+                funFact: "Asam lambung (HCl) sangat asam dan sanggup membunuh bakteri makanan!",
+                text: `<p><b>Lambung</b> adalah kantong berotot pencernaan di rongga perut sebelah kiri atas.</p>
+                       <p>Lambung melakukan pencernaan melalui dua cara:</p>
+                       <ul class="list-disc pl-5 space-y-1">
+                           <li><b>Mekanis:</b> Dinding otot lambung meremas dan mengaduk makanan.</li>
+                           <li><b>Kimiawi:</b> Menggunakan <i>Asam Lambung (HCl)</i> untuk membunuh kuman dan <i>Enzim Pepsin</i> memecah protein.</li>
+                       </ul>`,
+                svg: `<svg class="w-28 h-28 text-yellow-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>`,
+                miniQuiz: {
+                    q: "Asam Klorida (HCl) di dalam lambung berfungsi untuk...",
+                    ops: [
+                        { text: "Membunuh kuman penyakit pada makanan", correct: true },
+                        { text: "Memompa darah kotor", correct: false },
+                        { text: "Menyaring sari air", correct: false }
+                    ]
+                }
+            },
+            ginjal_hati: {
+                title: "GINJAL & HATI MANUSIA",
+                youtube: "https://www.youtube.com/embed/w8U7kXv3XgA",
+                funFact: "Sepasang ginjal menyaring sekitar 180 liter darah setiap harinya!",
+                text: `<p><b>Ginjal & Hati</b> merupakan organ penyaring utama tubuh.</p>
+                       <p><b>1. Hati (Liver):</b> Organ terbesar yang menetralkan racun (detoksifikasi) dan menghasilkan cairan empedu untuk mencerna lemak.</p>
+                       <p><b>2. Ginjal:</b> Sepasang organ berbentuk kacang di pinggang yang menyaring sisa metabolisme darah dan mengeluarkannya sebagai urine.</p>`,
+                svg: `<svg class="w-28 h-28 text-orange-500" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6z"/></svg>`,
+                miniQuiz: {
+                    q: "Organ yang bertugas menetralkan racun (detoksifikasi) adalah...",
+                    ops: [
+                        { text: "Hati", correct: true },
+                        { text: "Paru-Paru", correct: false },
+                        { text: "Lambung", correct: false }
+                    ]
+                }
+            },
+            otak: {
+                title: "OTAK MANUSIA",
+                youtube: "https://www.youtube.com/embed/QY2xYI1X-Q8",
+                funFact: "Otak mengandung sekitar 86 miliar sel saraf (neuron) yang terhubung cerdas!",
+                text: `<p><b>Otak</b> adalah pusat komando dan pengendali utama seluruh jaringan saraf manusia.</p>
+                       <p>Bagian-bagian utama otak:</p>
+                       <ul class="list-disc pl-5 space-y-1">
+                           <li><b>Otak Besar (Cerebrum):</b> Mengendalikan proses berpikir, ingatan, dan emosi.</li>
+                           <li><b>Otak Kecil (Cerebellum):</b> Mengatur keseimbangan dan koordinasi gerakan tubuh.</li>
+                           <li><b>Batang Otak:</b> Mengatur denyut jantung dan pernapasan secara otomatis.</li>
+                       </ul>`,
+                svg: `<svg class="w-28 h-28 text-purple-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.22 19.57 10.57 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/></svg>`,
+                miniQuiz: {
+                    q: "Bagian otak yang menjaga keseimbangan tubuh saat berjalan adalah...",
+                    ops: [
+                        { text: "Otak Kecil (Cerebellum)", correct: true },
+                        { text: "Otak Besar", correct: false },
+                        { text: "Batang Lambung", correct: false }
+                    ]
+                }
+            }
+        };
+
+        function switchOrganMateri(organId) {
+            playClickSound();
+            activeOrgan = organId;
+            const data = MATERI_DATA[organId];
+
+            // Tab Styles
+            ['jantung', 'paru', 'lambung', 'ginjal_hati', 'otak'].forEach(id => {
+                const tab = document.getElementById(`tab-${id}`);
+                if (tab) {
+                    if (id === organId) {
+                        tab.className = "btn-retro bg-arcadePink text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1";
+                    } else {
+                        tab.className = "btn-retro bg-white text-arcadePurple px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1";
+                    }
+                }
+            });
+
+            // Update UI elements
+            document.getElementById('materi-title').innerText = data.title;
+            document.getElementById('materi-body-text').innerHTML = data.text;
+            document.getElementById('materi-fun-fact').innerText = data.funFact;
+            document.getElementById('materi-svg-container').innerHTML = data.svg;
+            document.getElementById('youtube-player').src = data.youtube;
+
+            // Read Toggle Button
+            const readBtn = document.getElementById('read-toggle-btn');
+            if (organReadState[organId]) {
+                readBtn.className = "btn-retro bg-arcadeGreen text-arcadePurple text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 justify-center";
+                readBtn.innerHTML = "<span>✅</span> Selesai Dibaca";
+            } else {
+                readBtn.className = "btn-retro bg-white text-arcadePurple text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 justify-center";
+                readBtn.innerHTML = "<span>📖</span> Tandai Selesai Dibaca";
+            }
+
+            renderMiniQuiz(data.miniQuiz);
+        }
+
+        function markAsRead() {
+            playCorrectSound();
+            organReadState[activeOrgan] = true;
+
+            // Update badge in Stage 1 Menu
+            const badge = document.getElementById(`badge-${activeOrgan}`);
+            if (badge) {
+                badge.innerText = "✨ Selesai";
+                badge.className = "text-xs bg-arcadeGreen border border-arcadePurple px-2.5 py-0.5 rounded-lg font-bold text-arcadePurple";
+            }
+
+            const readBtn = document.getElementById('read-toggle-btn');
+            readBtn.className = "btn-retro bg-arcadeGreen text-arcadePurple text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 justify-center";
+            readBtn.innerHTML = "<span>✅</span> Selesai Dibaca";
+
+            updateMaterialProgressDisplay();
+        }
+
+        function getMaterialProgressPercent() {
+            const keys = Object.keys(organReadState);
+            const readCount = keys.filter(k => organReadState[k]).length;
+            return Math.round((readCount / keys.length) * 100);
+        }
+
+        function updateMaterialProgressDisplay() {
+            const pct = getMaterialProgressPercent();
+            document.getElementById('materi-progress-text').innerText = `${pct}%`;
+        }
+
+        function renderMiniQuiz(miniQuiz) {
+            document.getElementById('mini-quiz-question').innerText = miniQuiz.q;
+            const container = document.getElementById('mini-quiz-options');
+            const feedback = document.getElementById('mini-quiz-feedback');
+            feedback.classList.add('hidden');
+            container.innerHTML = '';
+
+            miniQuiz.ops.forEach((op) => {
+                const btn = document.createElement('button');
+                btn.className = "btn-retro bg-white hover:bg-yellow-100 text-arcadePurple text-xs font-bold p-2.5 rounded-xl text-left w-full transition-colors";
+                btn.innerText = op.text;
+                btn.onclick = () => {
+                    feedback.classList.remove('hidden');
+                    if (op.correct) {
+                        playCorrectSound();
+                        feedback.className = "text-xs font-bold p-2.5 rounded-xl text-center bg-arcadeGreen/30 text-arcadePurple border border-arcadePurple";
+                        feedback.innerText = "🎉 TEPAT SKALI! Pemahaman materimu terverifikasi!";
+                        markAsRead();
+                    } else {
+                        playWrongSound();
+                        feedback.className = "text-xs font-bold p-2.5 rounded-xl text-center bg-arcadePink/20 text-arcadePurple border border-arcadePurple";
+                        feedback.innerText = "❌ Kurang tepat, mari pelajari modul materi di atas!";
+                    }
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        // ================= STAGE 3: EVALUASI KUIS ENGINE =================
+        function initQuizStage() {
+            // Pick 5 random questions from 25 Bank
+            const shuffled = [...QUESTION_BANK].sort(() => 0.5 - Math.random());
+            activeQuizQuestions = shuffled.slice(0, 5);
+            currentQuestionIdx = 0;
+            quizCorrectCount = 0;
+            quizWrongCount = 0;
+            userQuizAnswers = [];
+
+            document.getElementById('quiz-container').classList.remove('hidden');
+            document.getElementById('result-modal').classList.add('hidden');
+
+            renderCurrentQuestion();
+        }
+
+        function resetQuizStage() {
+            playClickSound();
+            initQuizStage();
+        }
+
+        function renderCurrentQuestion() {
+            const q = activeQuizQuestions[currentQuestionIdx];
+            document.getElementById('quiz-current-num').innerText = currentQuestionIdx + 1;
+            document.getElementById('quiz-question-text').innerText = `${currentQuestionIdx + 1}. ${q.q}`;
+            
+            const pct = ((currentQuestionIdx + 1) / 5) * 100;
+            document.getElementById('quiz-progress-bar').style.width = `${pct}%`;
+
+            const optionsGrid = document.getElementById('quiz-options-grid');
+            optionsGrid.innerHTML = '';
+
+            const optionLabels = ["A", "B", "C", "D"];
+            q.ops.forEach((opText, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "btn-retro bg-white hover:bg-arcadeYellow text-arcadePurple font-bold text-xs sm:text-sm p-3.5 sm:p-4 rounded-xl text-left flex items-center gap-3 transition-colors font-rubik";
+                btn.innerHTML = `<span class="bg-arcadePurple text-white px-2.5 py-1 rounded-lg font-arcade text-[10px] shadow-retro-sm">${optionLabels[idx]}</span> <span>${opText}</span>`;
+                btn.onclick = () => handleAnswerSelect(idx);
+                optionsGrid.appendChild(btn);
+            });
+        }
+
+        function handleAnswerSelect(selectedIdx) {
+            const q = activeQuizQuestions[currentQuestionIdx];
+            const isCorrect = (selectedIdx === q.a);
+
+            // Record response
+            userQuizAnswers.push({
+                questionNum: currentQuestionIdx + 1,
+                questionText: q.q,
+                userChoice: q.ops[selectedIdx],
+                correctChoice: q.ops[q.a],
+                isCorrect: isCorrect,
+                points: isCorrect ? 100 : -20
+            });
+
+            if (isCorrect) {
+                playCorrectSound();
+                currentScore += 100;
+                quizCorrectCount++;
+                showFloatingScore("+100 PTS", "text-emerald-600");
+            } else {
+                playWrongSound();
+                currentScore -= 20;
+                quizWrongCount++;
+                showFloatingScore("-20 PTS", "text-rose-600");
+            }
+
+            document.getElementById('header-score').innerText = currentScore;
+
+            currentQuestionIdx++;
+            if (currentQuestionIdx < 5) {
+                setTimeout(() => {
+                    renderCurrentQuestion();
+                }, 500);
+            } else {
+                setTimeout(() => {
+                    showEvaluationResults();
+                }, 700);
+            }
+        }
+
+        function showFloatingScore(text, colorClass) {
+            const container = document.getElementById('floating-score-container');
+            const el = document.createElement('div');
+            el.className = `font-arcade text-2xl font-black ${colorClass} float-score bg-white border-3 border-arcadePurple px-4 py-2 rounded-2xl shadow-retro z-40`;
+            el.innerText = text;
+            container.appendChild(el);
+            setTimeout(() => el.remove(), 1000);
+        }
+
+        // ================= DYNAMIC FEEDBACK BANNER & RECORD SAVER =================
+        function showEvaluationResults() {
+            playFanfareSound();
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('result-modal').classList.remove('hidden');
+
+            const readPct = getMaterialProgressPercent();
+
+            // Populate Breakdown
+            document.getElementById('res-total-score').innerText = currentScore;
+            document.getElementById('res-correct').innerText = quizCorrectCount;
+            document.getElementById('res-wrong').innerText = quizWrongCount;
+            document.getElementById('res-read-pct').innerText = `${readPct}%`;
+
+            // Rank Title Logic
+            let rankText = "";
+            if (currentScore >= 450) {
+                rankText = "🏆 PREDIKAT: MASTER ANATOMI RETRO";
+            } else if (currentScore >= 300) {
+                rankText = "⭐ PREDIKAT: PAHLAWAN ORGAN TUBUH";
+            } else if (currentScore >= 150) {
+                rankText = "🎮 PREDIKAT: PETUALANG SAINS MEDIS";
+            } else {
+                rankText = "💪 PREDIKAT: DOKTER MUDA PEMULA";
+            }
+            document.getElementById('rank-badge').innerText = rankText;
+
+            // Dynamic Motivational Feedback Banner combining Menu & Quiz performance
+            let feedbackHtml = "";
+            if (readPct === 100 && currentScore >= 400) {
+                feedbackHtml = `
+                    <p class="font-bold text-emerald-800">🎉 HEBAT LUAR BIASA, ${studentData.name.toUpperCase()}!</p>
+                    <p>Kamu telah mempelajari <b>SELURUH (100%) modul organ</b> di Stage 1 & 2 serta berhasil mencapai skor evaluasi yang sangat fantastis (<b>${currentScore} PTS</b>). Pemahamanmu tentang Jantung, Paru-Paru, Lambung, Ginjal, Hati, dan Otak sangat sempurna!</p>
+                `;
+            } else if (readPct < 100 && currentScore >= 300) {
+                feedbackHtml = `
+                    <p class="font-bold text-amber-800">⭐ PERFORMA KUIS SANGAT BAGUS, ${studentData.name.toUpperCase()}!</p>
+                    <p>Skor evaluasimu sangat tinggi (<b>${currentScore} PTS</b>), namun kamu baru membaca <b>${readPct}% materi organ</b>. Yuk seret kartu organ dari Stage 1 Menu ke Stage 2 untuk menyelesaikan seluruh modul pembelajaran!</p>
+                `;
+            } else if (readPct === 100 && currentScore < 300) {
+                feedbackHtml = `
+                    <p class="font-bold text-blue-800">📖 SEMANGAT BELAJAR, ${studentData.name.toUpperCase()}!</p>
+                    <p>Kamu sudah rajin membaca 100% modul materi di Stage 2. Jangan berkecil hati dengan skor evaluasi (<b>${currentScore} PTS</b>). Klik tombol <i>'Coba Evaluasi Lagi'</i> di bawah untuk mengasah ingatanmu!</p>
+                `;
+            } else {
+                feedbackHtml = `
+                    <p class="font-bold text-purple-800">🚀 AWAL PETUALANGAN YANG BAGUS, ${studentData.name.toUpperCase()}!</p>
+                    <p>Kamu mendapatkan skor <b>${currentScore} PTS</b> dan menyelesaikan <b>${readPct}% materi</b>. Mari buka Halaman Menu (Stage 1), seret kartu organ ke Stage 2, dan baca tips kesehatannya untuk nilai yang lebih maksimal!</p>
+                `;
+            }
+
+            document.getElementById('dynamic-feedback-banner').innerHTML = feedbackHtml;
+
+            // Auto-save student attempt to LocalStorage for Teacher Admin view
+            saveAttemptToStorage({
+                timestamp: new Date().toLocaleString('id-ID'),
+                name: studentData.name,
+                class: studentData.class,
+                roll: studentData.roll,
+                readPct: readPct,
+                correctCount: quizCorrectCount,
+                wrongCount: quizWrongCount,
+                totalScore: currentScore,
+                rank: rankText.replace("🏆 PREDIKAT: ", "").replace("⭐ PREDIKAT: ", "").replace("🎮 PREDIKAT: ", "").replace("💪 PREDIKAT: ", ""),
+                passed: currentScore >= 300
+            });
+        }
+
+        function saveAttemptToStorage(record) {
+            let records = JSON.parse(localStorage.getItem('lms_organ_student_records') || '[]');
+            records.unshift(record);
+            localStorage.setItem('lms_organ_student_records', JSON.stringify(records));
+        }
+
+        // ================= ADMIN & TEACHER SPREADSHEET EXPORTER LOGIC =================
+        function openAdminModal() {
+            playClickSound();
+            document.getElementById('admin-modal').classList.remove('hidden');
+            document.getElementById('admin-password-input').value = '';
+            document.getElementById('admin-pwd-error').classList.add('hidden');
+
+            if (isAdminLoggedIn) {
+                document.getElementById('admin-login-step').classList.add('hidden');
+                document.getElementById('admin-dashboard-step').classList.remove('hidden');
+                renderAdminTable();
+            } else {
+                document.getElementById('admin-login-step').classList.remove('hidden');
+                document.getElementById('admin-dashboard-step').classList.add('hidden');
+            }
+        }
+
+        function closeAdminModal() {
+            playClickSound();
+            document.getElementById('admin-modal').classList.add('hidden');
+        }
+
+        function verifyAdminPassword() {
+            const pwd = document.getElementById('admin-password-input').value;
+            // Password verification check: "Idiladha"
+            if (pwd === "Idiladha") {
+                playCorrectSound();
+                isAdminLoggedIn = true;
+                document.getElementById('admin-login-step').classList.add('hidden');
+                document.getElementById('admin-dashboard-step').classList.remove('hidden');
+                renderAdminTable();
+            } else {
+                playWrongSound();
+                document.getElementById('admin-pwd-error').classList.remove('hidden');
+            }
+        }
+
+        function logoutAdmin() {
+            playClickSound();
+            isAdminLoggedIn = false;
+            document.getElementById('admin-login-step').classList.remove('hidden');
+            document.getElementById('admin-dashboard-step').classList.add('hidden');
+        }
+
+        function renderAdminTable() {
+            const records = JSON.parse(localStorage.getItem('lms_organ_student_records') || '[]');
+            document.getElementById('admin-count-badge').innerText = `${records.length} Siswa`;
+
+            const tbody = document.getElementById('admin-records-tbody');
+            tbody.innerHTML = '';
+
+            if (records.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-gray-500 italic">Belum ada data pengerjaan siswa. Klik "Tambah Contoh Data" untuk simulasi.</td></tr>`;
+                return;
+            }
+
+            records.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-yellow-50 transition-colors border-b border-arcadePurple/30";
+                tr.innerHTML = `
+                    <td class="p-2.5 border-r border-arcadePurple/30 whitespace-nowrap text-[11px]">${r.timestamp}</td>
+                    <td class="p-2.5 border-r border-arcadePurple/30 font-bold">${r.name}</td>
+                    <td class="p-2.5 border-r border-arcadePurple/30">${r.class} / No.${r.roll}</td>
+                    <td class="p-2.5 border-r border-arcadePurple/30 font-bold text-arcadeCyan">${r.readPct}%</td>
+                    <td class="p-2.5 border-r border-arcadePurple/30 font-bold text-emerald-600">${r.correctCount} (+${r.correctCount * 100})</td>
+                    <td class="p-2.5 border-r border-arcadePurple/30 font-bold text-rose-600">${r.wrongCount} (-${r.wrongCount * 20})</td>
+                    <td class="p-2.5 border-r border-arcadePurple/30 font-bold font-arcade text-arcadePink">${r.totalScore}</td>
+                    <td class="p-2.5 font-bold">${r.rank}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function addMockDataSample() {
+            playClickSound();
+            const samples = [
+                { timestamp: new Date().toLocaleString('id-ID'), name: "Budi Santoso", class: "6A", roll: "5", readPct: 100, correctCount: 5, wrongCount: 0, totalScore: 500, rank: "MASTER ANATOMI RETRO", passed: true },
+                { timestamp: new Date().toLocaleString('id-ID'), name: "Siti Rahma", class: "6A", roll: "12", readPct: 80, correctCount: 4, wrongCount: 1, totalScore: 380, rank: "PAHLAWAN ORGAN TUBUH", passed: true },
+                { timestamp: new Date().toLocaleString('id-ID'), name: "Doni Pratama", class: "6B", roll: "8", readPct: 40, correctCount: 2, wrongCount: 3, totalScore: 140, rank: "DOKTER MUDA PEMULA", passed: false }
+            ];
+            let records = JSON.parse(localStorage.getItem('lms_organ_student_records') || '[]');
+            samples.forEach(s => records.unshift(s));
+            localStorage.setItem('lms_organ_student_records', JSON.stringify(records));
+            renderAdminTable();
+        }
+
+        function clearAllStudentRecords() {
+            if (confirm("Apakah Anda yakin ingin menghapus semua rekap data pengerjaan siswa?")) {
+                playWrongSound();
+                localStorage.removeItem('lms_organ_student_records');
+                renderAdminTable();
+            }
+        }
+
+        // SPREADSHEET EXPORTER (.CSV)
+        function downloadSpreadsheetCSV() {
+            playClickSound();
+            const records = JSON.parse(localStorage.getItem('lms_organ_student_records') || '[]');
+
+            if (records.length === 0) {
+                alert("Belum ada data siswa untuk diunduh. Silakan lakukan kuis terlebih dahulu!");
+                return;
+            }
+
+            let csvRows = [];
+            
+            // CSV Header Title
+            csvRows.push(["=== LAPORAN EVALUASI LMS ANATOMI ORGAN TUBUH SD KELAS 6 ==="]);
+            csvRows.push(["Tanggal Ekspor", new Date().toLocaleDateString('id-ID') + " " + new Date().toLocaleTimeString('id-ID')]);
+            csvRows.push([]); // Blank row
+            
+            // Table Headers
+            csvRows.push(["No", "Waktu Pengerjaan", "Nama Siswa", "Kelas", "No Absen", "Materi Dibaca (%)", "Jawaban Benar (+100)", "Jawaban Salah (-20)", "Total Skor Arcade", "Predikat"]);
+
+            records.forEach((r, idx) => {
+                csvRows.push([
+                    idx + 1,
+                    `"${r.timestamp}"`,
+                    `"${r.name.replace(/"/g, '""')}"`,
+                    `"${r.class}"`,
+                    `"${r.roll}"`,
+                    `${r.readPct}%`,
+                    r.correctCount,
+                    r.wrongCount,
+                    r.totalScore,
+                    `"${r.rank}"`
+                ]);
+            });
+
+            // Convert to CSV String with UTF-8 BOM
+            const csvString = csvRows.map(row => row.join(",")).join("\n");
+            const blob = new Blob(["\uFEFF" + csvString], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Laporan_LMS_OrganTubuh_Guru_${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // ================= INITIALIZATION =================
+        window.onload = function() {
+            startTimer();
+            switchOrganMateri('jantung');
+            updateMaterialProgressDisplay();
+        };
+    </script>
+</body>
+</html>
